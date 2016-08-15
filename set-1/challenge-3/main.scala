@@ -18,12 +18,12 @@ object app {
       // encode output as hex
       val inputStr = new String(buffer);
       val charFreq = countChars(inputStr)
+      crackerAlgorithm((charFreq.head._1, charFreq.tail.head._1))
+     // val decodeChar = guessXORMappingChar(charFreq)
+     // println("Decode Char: " + decodeChar)
+     // val decodedString = inputStr map (xorTwoChars(decodeChar, _))
 
-      val decodeChar = guessXORMappingChar(charFreq)
-      println("Decode Char: " + decodeChar)
-      val decodedString = inputStr map (xorTwoChars(decodeChar, _))
-
-      decodedString map print
+      //decodedString map print
     } catch {
       case e : Exception => println(e)
     }
@@ -45,10 +45,27 @@ object app {
     outputBuffer
   }
 
-  def guessXORMappingChar(charCount: Map[Char, Int]) : Char = {
-    val highestCountChar = charCount.head._1
-    println("Highest Count Char: " + highestCountChar)
-    xorTwoChars(highestCountChar, ' ').head
+  def guessXORMappingChar(mostFreqChars: (Char,Char), guesses: (Char, Char)) : Char = {
+    val xorGuess1 = xorTwoChars(mostFreqChars._1, guesses._1)
+    val xorGuess2 = xorTwoChars(mostFreqChars._2, guesses._2)
+    val matchSuccess = xorGuess2 == xorGuess1
+    println("xorGuess1: " + xorGuess1 + " xorGuess2: " + xorGuess2)
+    if (matchSuccess) {
+      println("Char 1: " + mostFreqChars._1
+      + " Char 2: " + mostFreqChars._2
+      + "XORGuess: " + xorGuess1
+      + "Success: " + matchSuccess); 
+    }
+    'a'
+  }
+
+  def crackerAlgorithm(mostFreqChars: (Char,Char)) : Char = {
+    val highFreqChars = "EeTtAaOoIiNn SsHhRrDdLlUu"
+    for (highFreqChar1 <- highFreqChars;
+         highFreqChar2 <- highFreqChars 
+         if highFreqChar1 != highFreqChar2) yield 
+      guessXORMappingChar(mostFreqChars, (highFreqChar1, highFreqChar2))
+    'a'
   }
 
   def countChars(inputString: String): Map[Char, Int] = {
