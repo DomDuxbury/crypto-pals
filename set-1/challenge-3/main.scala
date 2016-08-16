@@ -18,10 +18,10 @@ object app {
       // encode output as hex
       val inputStr = new String(buffer);
       val charFreq = countChars(inputStr)
-      crackerAlgorithm((charFreq.head._1, charFreq.tail.head._1))
+      crackerAlgorithm(inputStr, (charFreq.head._1, charFreq.tail.head._1))
      // val decodeChar = guessXORMappingChar(charFreq)
      // println("Decode Char: " + decodeChar)
-     // val decodedString = inputStr map (xorTwoChars(decodeChar, _))
+      //val decodedString = inputStr map (xorTwoChars('', _))
 
       //decodedString map print
     } catch {
@@ -45,26 +45,28 @@ object app {
     outputBuffer
   }
 
-  def guessXORMappingChar(mostFreqChars: (Char,Char), guesses: (Char, Char)) : Char = {
+  def guessXORMappingChar(input : String, mostFreqChars: (Char,Char), guesses: (Char, Char)) : Char = {
     val xorGuess1 = xorTwoChars(mostFreqChars._1, guesses._1)
     val xorGuess2 = xorTwoChars(mostFreqChars._2, guesses._2)
     val matchSuccess = xorGuess2 == xorGuess1
-    println("xorGuess1: " + xorGuess1 + " xorGuess2: " + xorGuess2)
-    if (matchSuccess) {
-      println("Char 1: " + mostFreqChars._1
-      + " Char 2: " + mostFreqChars._2
-      + "XORGuess: " + xorGuess1
-      + "Success: " + matchSuccess); 
+    if (matchSuccess && xorGuess1.length == 1) {
+      println(xorGuess1.head)
+      println("Char 1: " + mostFreqChars._1 + " -> " + guesses._1
+      + " Char 2: " + mostFreqChars._2 + " -> " + guesses._2
+      + " XORGuess: " + xorGuess1
+      + " Success: " + matchSuccess); 
+      val decodedString = input map (xorTwoChars(xorGuess1.head, _))
+      decodedString map print
     }
     'a'
   }
 
-  def crackerAlgorithm(mostFreqChars: (Char,Char)) : Char = {
+  def crackerAlgorithm(input : String, mostFreqChars: (Char,Char)) : Char = {
     val highFreqChars = "EeTtAaOoIiNn SsHhRrDdLlUu"
     for (highFreqChar1 <- highFreqChars;
          highFreqChar2 <- highFreqChars 
          if highFreqChar1 != highFreqChar2) yield 
-      guessXORMappingChar(mostFreqChars, (highFreqChar1, highFreqChar2))
+      guessXORMappingChar(input, mostFreqChars, (highFreqChar1, highFreqChar2))
     'a'
   }
 
@@ -73,7 +75,7 @@ object app {
                               .map(p => (p._1, p._2.length))
     
     val sortedCharFreq = ListMap(unsortedCharFreq.toSeq.sortBy(_._2).reverse:_*)
-    printMap(sortedCharFreq) 
+    //printMap(sortedCharFreq) 
     sortedCharFreq
   }
 
