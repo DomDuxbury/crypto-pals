@@ -6,93 +6,83 @@ object app {
     try {
 
       // Get input numbers
-      val number1 = args(0)
-      //val xorChar = args(1)
+      val encodedHex = args(0)
 
-      // Convert input from base 16 to Bytes
-      val buffer = new java.math.BigInteger(number1, 16).toByteArray()
-      val xorChar = "a".getBytes("UTF-8")(0)
-
-      val outputBuffer = xorBufferAndByte(buffer, xorChar) 
-
-      // encode output as hex
-      val inputStr = new String(buffer);
-      val charFreq = countChars(inputStr)
-      crackerAlgorithm(inputStr, (charFreq.head._1, charFreq.tail.head._1))
-     // val decodeChar = guessXORMappingChar(charFreq)
-     // println("Decode Char: " + decodeChar)
-      //val decodedString = inputStr map (xorTwoChars('', _))
-
-      //decodedString map print
+      // Convert input from base 16 to Bytes then to String
+      val encodedByteArray = hex2bytes(encodedHex)
+      val encodedString = new String(encodedByteArray);
+       
+      // Count most frequent chars in the input
+      val mostFreqChars = countChars(encodedString)
+      // Get the possible solutions
+      val possibleSolutions = crackerAlgorithm(encodedString, mostFreqChars)
+      
+      prettyPrintSolutions(possibleSolutions)
     } catch {
       case e : Exception => println(e)
     }
   }
 
-  def xorTwoChars(char1: Char, char2: Char) : String = {
-    val output = char1.toString.getBytes("UTF-8")(0) ^ char2.toString.getBytes("UTF-8")(0)
-    new String(Array(output.toByte))
+  def prettyPrintSolutions(possibleSolutions : Seq[String]) : Unit = {
+    println("Solutions: ")
+    var count = 1
+    possibleSolutions map (solution => {
+      println(s"\t ${count}: ${solution}\n")
+      count += 1
+    })
+  }
+
+  def xorTwoChars(char1: Char, char2: Char) : Int = {
+    char1.toString.getBytes("UTF-8")(0) ^ char2.toString.getBytes("UTF-8")(0)
+  }
+
+  def hex2bytes(hex: String): Array[Byte] = {
+    if(hex.contains(" ")){
+      hex.split(" ").map(Integer.parseInt(_, 16).toByte)
+    } else if(hex.contains("-")){
+      hex.split("-").map(Integer.parseInt(_, 16).toByte)
+    } else {
+      hex.sliding(2,2).toArray.map(Integer.parseInt(_, 16).toByte)
+    }
+  }
+
+  def xorDecodeString(encodedMessage: String, decodeChar: Char) : String = { 
+    encodedMessage map (
+      encodedChar => xorTwoChars(encodedChar, decodeChar).toChar
+    )
   }
   
-  def xorBufferAndByte(buffer: Array[Byte], byte: Byte): Array[Byte] = {
-    
-    val outputBuffer = new Array[Byte](buffer.length)    
-    
-    for ( i <- 0 to buffer.length - 1) {
-      outputBuffer(i) = (buffer(i) ^ byte).toByte
-    }
-
-    outputBuffer
+  def guessXORMappingChar(input : String, mostFreqChars: Seq[Char], guesses: (Char, Char)) : (Boolean, Char) = {
+    val xorGuess1 = xorTwoChars(mostFreqChars(0), guesses._1)
+    val xorGuess2 = xorTwoChars(mostFreqChars(1), guesses._2)
+    val matchSuccess = xorGuess1 == xorGuess2
+    var charGuess = new String(Array(xorGuess1.toByte)).head 
+    (matchSuccess, charGuess)
   }
 
-  def guessXORMappingChar(input : String, mostFreqChars: (Char,Char), guesses: (Char, Char)) : Char = {
-    val xorGuess1 = xorTwoChars(mostFreqChars._1, guesses._1)
-    val xorGuess2 = xorTwoChars(mostFreqChars._2, guesses._2)
-    val matchSuccess = xorGuess2 == xorGuess1
-    if (matchSuccess && xorGuess1.length == 1) {
-      println(xorGuess1.head)
-      println("Char 1: " + mostFreqChars._1 + " -> " + guesses._1
-      + " Char 2: " + mostFreqChars._2 + " -> " + guesses._2
-      + " XORGuess: " + xorGuess1
-      + " Success: " + matchSuccess); 
-      val decodedString = input map (xorTwoChars(xorGuess1.head, _))
-      decodedString map print
-    }
-    'a'
-  }
-
-  def crackerAlgorithm(input : String, mostFreqChars: (Char,Char)) : Char = {
+  def crackerAlgorithm(input : String, mostFreqChars: Seq[Char]) : Seq[String] = {
     val highFreqChars = "EeTtAaOoIiNn SsHhRrDdLlUu"
-    for (highFreqChar1 <- highFreqChars;
-         highFreqChar2 <- highFreqChars 
-         if highFreqChar1 != highFreqChar2) yield 
-      guessXORMappingChar(input, mostFreqChars, (highFreqChar1, highFreqChar2))
-    'a'
+
+    val allGuesses = 
+      for (highFreqChar1 <- highFreqChars; 
+           highFreqChar2 <- highFreqChars 
+           if highFreqChar1 != highFreqChar2) yield 
+        guessXORMappingChar(input, mostFreqChars, (highFreqChar1, highFreqChar2))
+    
+    val matchedGuesses = allGuesses
+      .filter(matchChar => matchChar._1)
+      .map(matchChar => matchChar._2)
+    
+    matchedGuesses.map(xorDecodeString(input, _))
   }
 
-  def countChars(inputString: String): Map[Char, Int] = {
+  def countChars(inputString: String): Seq[Char] = {
     val unsortedCharFreq = inputString.groupBy(_.toChar)
                               .map(p => (p._1, p._2.length))
     
-    val sortedCharFreq = ListMap(unsortedCharFreq.toSeq.sortBy(_._2).reverse:_*)
-    //printMap(sortedCharFreq) 
-    sortedCharFreq
-  }
-
-  def printMap(map : Map[Char, Int]) = {
-     val mapString = map.view map {
-          case (key, value) => "\tKey: " + "%04X".format(key.toInt) + "\tValue: " + value
-      } mkString ("", "\n", "\n")
-
-      println("myMap:\n" + mapString)
-  }
-
-  // Function to convert bytes to base 16 string
-  def bytes2hex(bytes: Array[Byte], sep: Option[String] = None): String = {
-    sep match {
-      case None => bytes.map("%02x".format(_)).mkString
-      case _ => bytes.map("%02x".format(_)).mkString(sep.get)
-    }
+    ListMap(unsortedCharFreq.toSeq.sortBy(_._2).reverse:_*)
+      .take(2)
+      .map(charMapToCount => charMapToCount._1).toSeq
   }
 
 }
