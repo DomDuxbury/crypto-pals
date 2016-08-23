@@ -1,0 +1,26 @@
+(
+ :root-dir "/home/duxbug/code/kata/crypto-challenges/set-1/challenge-5"
+ :cache-dir "/home/duxbug/code/kata/crypto-challenges/set-1/challenge-5/.ensime_cache"
+ :scala-compiler-jars ("/home/duxbug/.sbt/boot/scala-2.10.6/lib/scala-compiler.jar" "/home/duxbug/.sbt/boot/scala-2.10.6/lib/scala-library.jar" "/home/duxbug/.sbt/boot/scala-2.10.6/lib/scala-reflect.jar" "/home/duxbug/.ivy2/cache/org.scala-lang/scalap/jars/scalap-2.10.6.jar")
+ :name "challenge-5"
+ :java-home "/usr/lib/jvm/java-8-openjdk-amd64"
+ :java-flags ("-Xss2m" "-Xms1024m" "-Xmx1024m" "-XX:ReservedCodeCacheSize=128m" "-XX:MaxMetaspaceSize=256m")
+ :java-compiler-args nil
+ :reference-source-roots nil
+ :scala-version "2.10.6"
+ :compiler-args ("-feature" "-deprecation" "-Xlint" "-Yinline-warnings" "-Yno-adapted-args" "-Ywarn-dead-code" "-Ywarn-numeric-widen" "-Xfuture")
+ :formatting-prefs nil
+ :disable-source-monitoring nil
+ :disable-class-monitoring nil
+ :subprojects ((
+   :name "challenge-5"
+   :source-roots nil
+   :targets ("/home/duxbug/code/kata/crypto-challenges/set-1/challenge-5/target/scala-2.10/classes")
+   :test-targets ("/home/duxbug/code/kata/crypto-challenges/set-1/challenge-5/target/scala-2.10/test-classes")
+   :depends-on-modules nil
+   :compile-deps ("/home/duxbug/.sbt/boot/scala-2.10.6/lib/scala-library.jar")
+   :runtime-deps nil
+   :test-deps nil
+   :doc-jars ("/home/duxbug/code/kata/crypto-challenges/set-1/challenge-5/target/scala-2.10/challenge-5_2.10-0.1-SNAPSHOT-javadoc.jar" "/home/duxbug/.ivy2/cache/org.scala-lang/scala-library/docs/scala-library-2.10.6-javadoc.jar")
+   :reference-source-roots ("/home/duxbug/.ivy2/cache/org.scala-lang/scala-library/srcs/scala-library-2.10.6-sources.jar")))
+)
