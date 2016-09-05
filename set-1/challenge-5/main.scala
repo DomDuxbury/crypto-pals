@@ -1,6 +1,6 @@
 import java.io._
 
-object app {
+object RepeatingXor {
   
   def main(args: Array[String]): Unit = {
     try {
@@ -24,6 +24,7 @@ object app {
     }
   }
 
+
   def repeatingXOR(text: String, key: String) : String = {
     
     val textBytes = text.getBytes("UTF-8")
@@ -37,9 +38,13 @@ object app {
       encryptedByte.toByte
     })
     
-    bytes2hex(encryptedBytes)
-  }
+    HexConverter.bytes2hex(encryptedBytes)
+  } 
   
+}
+
+object HexConverter {
+
   def hex2bytes(hex: String): Array[Byte] = {
     if(hex.contains(" ")){
       hex.split(" ").map(Integer.parseInt(_, 16).toByte)
@@ -55,6 +60,6 @@ object app {
     case None =>  bytes.map("%02x".format(_)).mkString
     case _ =>  bytes.map("%02x".format(_)).mkString(sep.get)
     }
-  }  
-  
+  }
+
 }
