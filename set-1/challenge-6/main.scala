@@ -1,17 +1,25 @@
 import java.io._
+import sun.misc.{BASE64Encoder, BASE64Decoder}
+import freqAnalysis._
 
 object RepeatingXor {
   
   def main(args: Array[String]): Unit = {
     try {
-      //val fileInput = args(0)
+      val fileInput = args(0)
       //val fileOutput = args(1)
       //val encryptKey = args(2)
+      val decoder = new BASE64Decoder()
 
-      //// Get input txt
-      //val plainText = io.Source.fromFile(fileInput).mkString
-      //
-      //// Encrypt contents with repeatingXOR
+      val keysize = 2
+      val score = freqAnalysis.scoreText("ETOIN")
+      println(score)
+
+      // Get input txt
+      val inputText = io.Source.fromFile(fileInput).mkString
+      val bytes = decoder.decodeBuffer(inputText)
+      val likelyKeysizes = getLikelyKeysizes(bytes)
+      likelyKeysizes map println
       //val output = repeatingXOR(plainText, encryptKey)
       //
       //// Open output file connection
@@ -19,16 +27,22 @@ object RepeatingXor {
       //
       //outputFile.write(output)
       //outputFile.close()
-      val input1 = io.Source.fromFile(args(0)).mkString
-      val input2 = io.Source.fromFile(args(1)).mkString
       //val plainText = io.Source.fromFile(fileInput).mkString
-      val result = hammingDistance(input1, input2)
-      println(result)
     } catch {
       case e : Exception => println(e)
     }
   }
 
+  def getLikelyKeysizes(bytes : Array[Byte]) : List[Int] = {
+    
+    val hDistances = for {
+      keysize <- 2 to 40
+      (firstBytes, secondBytes) = bytes.splitAt(keysize)
+      distance = hammingDistance(firstBytes, secondBytes) / keysize
+    } yield (keysize, distance) 
+    
+    hDistances.sortWith(_._2 < _._2).take(4).map(_._1).toList 
+  }
 
   def repeatingXOR(text: String, key: String) : String = {
     
@@ -46,15 +60,14 @@ object RepeatingXor {
     HexConverter.bytes2hex(encryptedBytes)
   } 
   
-  def hammingDistance(string1: String, string2: String): Int  = {
-    
-    def toBinaryStr(string :String): String = 
-      string
-        .getBytes("UTF-8")
+  def hammingDistance(bytes1: Array[Byte], bytes2: Array[Byte]): Int  = { 
+
+    def toBinaryStr(bytes :Array[Byte]): String = 
+      bytes
         .map(byte => byte.toInt.toBinaryString)
         .reduce(_ + _)
 
-    val zippedStrings = toBinaryStr(string1) zip toBinaryStr(string2)
+    val zippedStrings = toBinaryStr(bytes1) zip toBinaryStr(bytes2)
     zippedStrings.map(zip => zip._1 ^ zip._2).sum
   }
 }
